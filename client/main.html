@@ -1,0 +1,30 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+{{> googleMaps}}
+
+<div class="map-container">
+    {{> googleMap name="exampleMap" options=exampleMapOptions}}
+</div>
+
+</body>
+
+<template name="googleMaps">
+    <button class="loadAll">LoadAll</button>
+{{ counter }}
+    <ul>
+    {{#each getZones}}
+        <li class="polygonName"><a class="polygonInfo"> {{name}} </a></li>
+    {{/each}}
+    </ul>
+</template>
+
+<template name="googleMapsDraw">
+
+
+</template>
+
+
