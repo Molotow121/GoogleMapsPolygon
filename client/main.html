@@ -5,11 +5,7 @@
 
 <body>
 {{> googleMaps}}
-
-<div class="map-container">
-    {{> googleMap name="exampleMap" options=exampleMapOptions}}
-</div>
-
+{{> googleMapsBody}}
 </body>
 
 <template name="googleMaps">
@@ -22,9 +18,13 @@
     </ul>
 </template>
 
-<template name="googleMapsDraw">
+<template name="googleMapsBody">
 
+    <div class="map-container">
+        {{> googleMap name="exampleMap" options=exampleMapOptions}}
 
+    </div>
 </template>
+
 
 

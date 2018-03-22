@@ -7,21 +7,13 @@ import {Meteor} from "meteor/meteor";
 import {ReactiveVar} from "meteor/reactive-var";
 
 
-let triangleCoords = [
-    {lat: 50.847573, lng: 31.28356},
-    {lat: 51.103522, lng: 31.997681},
-    {lat: 51.182786, lng: 31.349487}
-];
 if (Meteor.isClient) {
-
     Meteor.startup(function () {
-        GoogleMaps.load({v: '3', key: 'AIzaSyCWuy1zQVFmWkO7EtcWqoGMAickeXQB0E8', libraries: 'drawing'});
-        // let coords = GeoZones.find({}).fetch();
-        // console.log(coords);
+
     });
 }
 
-Template.body.helpers({
+Template.googleMapsBody.helpers({
     exampleMapOptions: function () {
         if (GoogleMaps.loaded()) {
             return {
@@ -32,32 +24,34 @@ Template.body.helpers({
     }
 });
 
-Template.body.onCreated(function () {
+Template.googleMapsBody.onCreated(function () {
 createPolygon();
 });
 
 export function createPolygon( coords = null, load = null){
 
-    GoogleMaps.ready('exampleMap', function (map) {
+    GoogleMaps.load({v: '3', key: 'AIzaSyCWuy1zQVFmWkO7EtcWqoGMAickeXQB0E8', libraries: 'drawing'});
 
+    GoogleMaps.ready('exampleMap', function (map) {
+        console.log(coords);
         let marker = new google.maps.Marker({
             position: map.options.center,
-            map: map.instance
+            map: map.instance,
+            animation: google.maps.Animation.DROP,
         });
-        let bermudaTriangle = new google.maps.Polygon({
-            paths: coords ? coords : triangleCoords,
-            strokeColor: '#FF0000',
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: '#FF0000',
-            fillOpacity: 0.35
-        });
-        bermudaTriangle.setMap(map.instance);
-        console.log(222);
-        /* if(load === true) {
-            let loadAlls = LoadAll();
-            console.log(222);
-            loadAlls.forEach((element) => {
+        if(coords) {
+            bermudaTriangle = new google.maps.Polygon({
+                paths: coords,
+                strokeColor: '#0816ff',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#FF0000',
+                fillOpacity: 0.35
+            });
+            bermudaTriangle.setMap(map.instance);
+        }
+         if(load) {
+             load.forEach((element) => {
                 polygonArray = element;
                 bermudaTriangle = new google.maps.Polygon({
                     paths: polygonArray,
@@ -68,10 +62,9 @@ export function createPolygon( coords = null, load = null){
                     fillOpacity: 0.35
                 });
                 bermudaTriangle.setMap(map.instance);
-                console.log(loadAll);
             });
-        }*/
-        if(!coords ) {
+        }
+        if(!coords && !load) {
         let drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.MARKER,
             drawingControl: true,
@@ -79,7 +72,7 @@ export function createPolygon( coords = null, load = null){
                 position: google.maps.ControlPosition.TOP_CENTER,
                 drawingModes: ['marker', 'circle', 'polygon', 'polyline', 'rectangle',]
             },
-            markerOptions: {icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'},
+                markerOptions: {icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'},
             circleOptions: {
                 fillColor: '#ff1b37',
                 fillOpacity: 0.3,
@@ -88,14 +81,11 @@ export function createPolygon( coords = null, load = null){
                 editable: true,
                 zIndex: 1
             },
-            polygon: {
-                paths: triangleCoords
-            }
         });
         drawingManager.setMap(map.instance);
 
         let polygonArray = [];
-        console.log(load);
+        // console.log(load);
 
         google.maps.event.addListener(drawingManager, 'polygoncomplete', function (polygon) {
             polygonArray = [];
@@ -134,8 +124,9 @@ function save(polygonObject) {
 }
 
 function LoadAll(){
+    console.log('loadAll');
     let array = [];
-    GeoZones.find().forEach(function (doc) {
+    GeoZones.find({}).forEach(function (doc) {
         array.push(doc.coords)
     });
 
@@ -150,7 +141,6 @@ Template.googleMaps.onCreated(function helloOnCreated() {
 
 Template.googleMaps.helpers({
     getZones() {
-        console.log(GeoZones.find({}).fetch());
         return GeoZones.find({}).fetch();
     },
     counter() {
@@ -159,18 +149,23 @@ Template.googleMaps.helpers({
 });
 
 Template.googleMaps.events({
+
     'click .loadAll'(event, instance) {
        /* instance.counter.set(instance.counter.get() + 1);*/
-       console.log(1);
-        createPolygon(null, true);
+        let array = [];
+        GeoZones.find({}).forEach(function (doc) {
+            array.push(doc.coords)
+        });
+        createPolygon(null, array);
     },
 
     'click .polygonInfo'(event, instance) {
-        createPolygon(this.coords);
+        createPolygon(this.coords, null);
        console.log(this);
     },
 
 });
+
 
 
 
